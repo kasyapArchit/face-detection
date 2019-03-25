@@ -3,7 +3,7 @@ import cv2
 import os
 from collections import OrderedDict
 
-def load_image(lt_dir, args):
+def load_image(lt_dir):
 	print("Loading image...")
 	res = []
 	
@@ -13,9 +13,6 @@ def load_image(lt_dir, args):
 		
 		for pth in os.listdir(d):
 			img = cv2.imread(os.path.join(d, pth), cv2.IMREAD_COLOR)
-			# if the image size(memory) is too large then resize the image (memory trade of)
-			if args["data"]!="0":
-				img = cv2.resize(img, (200,200))
 			res.append(img)
 
 	print("Loading complete")

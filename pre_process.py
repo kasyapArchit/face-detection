@@ -51,9 +51,12 @@ class PreProcess:
 		gray = self.get_grayscale(resized)
 
 		for i in range(self.n):
-			print("    "+str(i+1))
 			image = resized[i]
 			rects = detector(gray[i], 2)
+			if len(rects) == 0:
+				print("    "+str(i+1)+" failed")
+				continue
+			print("    "+str(i+1))
 			for rect in rects:
 				(x, y, w, h) = rect_to_bb(rect)
 				# faceOrig = self.resize([image[y:y + h, x:x + w]], width=256)[0]
