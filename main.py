@@ -11,6 +11,7 @@ from face_util.helpers import load_image
 if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--preProc", required=True, help="to do pre-processing or not; in case of preprocessing only one class is used")
+	ap.add_argument("-m", "--modelPredictor", required=False, help="which model to use as face predictor in pre-processing")
 	args = vars(ap.parse_args())
 
 	# -----------------------------------------------------------------------------
@@ -30,16 +31,18 @@ if __name__ == "__main__":
 	# -----------------------------------------------------------------------------
 	# 2. Do the pre-processing
 	if args["preProc"] == "1":
-		for dir in lt_dir:
-			print("\n---------------------Pre-processing ./input/"+dir+"...")
-			data = load_image(["./input/"+dir])
-			pre_process = pp.PreProcess(data)
-			align_data = pre_process.align_resize()
+		if args["modelPredictor"] == "dlib":
+			for dir in lt_dir:
+				print("\n---------------------Pre-processing ./input/"+dir+"...")
+				data = load_image(["./input/"+dir])
+				pre_process = pp.PreProcess(data)
+				align_data = pre_process.align_resize_dlib()
 
-			os.mkdir("./pp_input/"+dir)
-			print("    Storing pre-processed image...")
-			for i in range(len(align_data)):
-				cv2.imwrite("./pp_input/"+dir+"/"+str(i+1)+".png", align_data[i])
+				os.mkdir("./pp_input_dlib/"+dir)
+				print("    Storing pre-processed image...")
+				for i in range(len(align_data)):
+					cv2.imwrite("./pp_input_dlib/"+dir+"/"+str(i+1)+".png", align_data[i])
+		
 
 		print("Pre-processing done")
 		sys.exit()

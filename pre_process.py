@@ -40,7 +40,7 @@ class PreProcess:
 
 		return res
 
-	def align_resize(self):
+	def align_resize_dlib(self):
 		print("Aligning and resizing images...")
 		res = []
 		detector = dlib.get_frontal_face_detector()
@@ -58,7 +58,7 @@ class PreProcess:
 				continue
 			print("    "+str(i+1))
 			for rect in rects:
-				(x, y, w, h) = rect_to_bb(rect)
+				# (x, y, w, h) = rect_to_bb(rect)
 				# faceOrig = self.resize([image[y:y + h, x:x + w]], width=256)[0]
 				faceAligned = fa.align(image, gray[i], rect)
 			
