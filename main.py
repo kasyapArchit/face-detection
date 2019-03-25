@@ -21,6 +21,8 @@ if __name__ == "__main__":
 		print("Preprocessing images...")
 		for d in os.listdir("./input"):
 			lt_dir.append(d)
+		# lt_dir = ["Suraj"]
+		# lt_dir = lt_dir[:2]
 	else:
 		for d in os.listdir("./pp_input"):
 			lt_dir.append("./pp_input/"+d)
@@ -37,12 +39,22 @@ if __name__ == "__main__":
 				data = load_image(["./input/"+dir])
 				pre_process = pp.PreProcess(data)
 				align_data = pre_process.align_resize_dlib()
-
+				# view_image(align_data)
 				os.mkdir("./pp_input_dlib/"+dir)
 				print("    Storing pre-processed image...")
 				for i in range(len(align_data)):
 					cv2.imwrite("./pp_input_dlib/"+dir+"/"+str(i+1)+".png", align_data[i])
-		
+		else:
+			for dir in lt_dir:
+				print("\n---------------------Pre-processing ./input/"+dir+"...")
+				data = load_image(["./input/"+dir])
+				pre_process = pp.PreProcess(data)
+				align_data = pre_process.align_resize_harr()
+				# view_image(align_data)
+				os.mkdir("./pp_input_harr/"+dir)
+				print("    Storing pre-processed image...")
+				for i in range(len(align_data)):
+					cv2.imwrite("./pp_input_harr/"+dir+"/"+str(i+1)+".png", align_data[i])
 
 		print("Pre-processing done")
 		sys.exit()

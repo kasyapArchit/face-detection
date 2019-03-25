@@ -65,3 +65,40 @@ class PreProcess:
 			res.append(faceAligned)
 		print("Images aligned")
 		return res
+	
+	def align_resize_harr(self):
+		print("Aligning and resizing images...")
+		res = []
+		face_cascade = cv2.CascadeClassifier('./haarcascades/haarcascade_frontalface_default.xml')
+		eye_cascade = cv2.CascadeClassifier('./haarcascades/haarcascade_eye.xml')
+		fa = FaceAligner(eye_cascade, desiredFaceWidth=256)
+
+		gray = self.get_grayscale(self.data)
+
+		for i in range(self.n):
+			img = self.data[i]
+			img_gray = gray[i]
+			
+			try:
+				faces = face_cascade.detectMultiScale(img_gray, 1.3, 5)
+				(x,y,w,h) = faces[0]
+				roi_gray = img_gray[y:y+h, x:x+w]
+				roi_color = img[y:y+h, x:x+w]
+				
+				eyes = eye_cascade.detectMultiScale(roi_gray, 1.1, 3)
+				(ex1,ey1,ew1,eh1) = eyes[0]
+				(ex2,ey2,ew2,eh2) = eyes[1]
+				
+				if(ex1 < ex2):
+					lt_mid = [(ex1+(int)(ew1/2)), (ey1+(int)(eh1/2))]
+					rt_mid = [(ex2+(int)(ew2/2)), (ey2+(int)(eh2/2))]
+				else:
+					rt_mid = [(ex1+(int)(ew1/2)), (ey1+(int)(eh1/2))]
+					lt_mid = [(ex2+(int)(ew2/2)), (ey2+(int)(eh2/2))]
+			except:
+				print("    "+str(i+1)+" failed")
+				continue
+			print("    "+str(i+1))
+			res.append(fa.align_eye(roi_color, rt_mid, lt_mid))
+			# res.append(roi_color)
+		return res
