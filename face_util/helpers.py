@@ -6,6 +6,7 @@ from collections import OrderedDict
 def load_image(lt_dir):
 	print("Loading image...")
 	res = []
+	y = []
 	
 	for i in range(len(lt_dir)):
 		d = lt_dir[i]
@@ -14,9 +15,10 @@ def load_image(lt_dir):
 		for pth in os.listdir(d):
 			img = cv2.imread(os.path.join(d, pth), cv2.IMREAD_COLOR)
 			res.append(img)
+			y.append(i)
 
 	print("Loading complete")
-	return res
+	return (res, y)
 
 def view_image(img_lt):
 	print("Viewing images...")
