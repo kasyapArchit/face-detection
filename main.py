@@ -13,6 +13,39 @@ from sklearn.model_selection import train_test_split
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 
+def cv2Eigen(x_train, x_test, y_train, y_test):
+	face_recognizer = cv2.face.EigenFaceRecognizer_create()
+	face_recognizer.train(x_train, np.array(y_train))
+	y_pred = []
+	for img in x_test:
+		label, confidence = face_recognizer.predict(img)
+		y_pred.append(label)
+	
+	print('Accuracy cv2Eigen = ' + str(accuracy_score(y_test, y_pred)))
+	return
+
+def cv2Fisher(x_train, x_test, y_train, y_test):
+	face_recognizer = cv2.face.FisherFaceRecognizer_create()
+	face_recognizer.train(x_train, np.array(y_train))
+	y_pred = []
+	for img in x_test:
+		label, confidence = face_recognizer.predict(img)
+		y_pred.append(label)
+	
+	print('Accuracy cv2Fisher = ' + str(accuracy_score(y_test, y_pred)))
+	return
+
+def cv2LBPH(x_train, x_test, y_train, y_test):
+	face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+	face_recognizer.train(x_train, np.array(y_train))
+	y_pred = []
+	for img in x_test:
+		label, confidence = face_recognizer.predict(img)
+		y_pred.append(label)
+	
+	print('Accuracy cv2LBPH = ' + str(accuracy_score(y_test, y_pred)))
+	return
+
 if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--preProc", required=True, help="to do pre-processing or not; in case of preprocessing only one class is used")
@@ -21,7 +54,7 @@ if __name__ == "__main__":
 	args = vars(ap.parse_args())
 
 	# -----------------------------------------------------------------------------
-	# 1. load the pre processed image in RGB 
+	# 1. load the image in case of preprocessing
 	lt_dir = []
 	hm = args["inputPath"] # if the name(folder) is data then give => data/
 	if args["preProc"] == "1":
@@ -31,14 +64,14 @@ if __name__ == "__main__":
 		# lt_dir = ["Suraj"]
 		# lt_dir = lt_dir[:2]
 	else:
-		esc_lt = ["Ankush", "Anshuk", "Juhi", "Harsha_5th_year", "Naman", "Pragya", "Rachit", "Rakshith", "SaiPradeep", "Suraj"]
+		# esc_lt = ["Ankush", "Anshuk", "Juhi", "Harsha_5th_year", "Naman", "Pragya", "Rachit", "Rakshith", "SaiPradeep", "Suraj"]
+		esc_lt = ["Ankush", "Suraj"]
 		for d in os.listdir(hm):
 			if d not in esc_lt:
 				lt_dir.append(hm+d)
 
 	if args["preProc"] == "0":
 		(data,y) = load_image(lt_dir)
-		# print(len(data), len(y))
 
 	# -----------------------------------------------------------------------------
 	# 2. Do the pre-processing
@@ -76,27 +109,12 @@ if __name__ == "__main__":
 	data_gr = pre_process.get_grayscale(data)
 	del pre_process
 	x_train,x_test,y_train,y_test = train_test_split(data_gr, y, test_size=0.2, random_state=29)
-	# print(len(x_train), len(y_train))
-	# print(len(x_test), len(y_test))
 
 	# -----------------------------------------------------------------------------
 	# 4. Making models and predicting
-	# using LDA(Fisher faces)
-	# face_recognizer = cv2.face.FisherFaceRecognizer_create()
-	
-	# using EigenFaceRecognizer
-	# face_recognizer = cv2.face.EigenFaceRecognizer_create()
+	cv2Eigen(x_train, x_test, y_train, y_test)
+	cv2Fisher(x_train, x_test, y_train, y_test)
+	cv2LBPH(x_train, x_test, y_train, y_test)
 
-	# using LBPH face recognizer
-	face_recognizer = cv2.face.LBPHFaceRecognizer_create()
-	
-	face_recognizer.train(x_train, np.array(y_train))
-
-	y_pred = []
-	for img in x_test:
-		label, confidence = face_recognizer.predict(img)
-		y_pred.append(label)
-	
-	print('Accuracy ' + str(accuracy_score(y_test, y_pred)))
 # References:
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
