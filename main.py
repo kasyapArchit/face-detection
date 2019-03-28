@@ -63,15 +63,6 @@ if __name__ == "__main__":
 			lt_dir.append(d)
 		# lt_dir = ["Suraj"]
 		# lt_dir = lt_dir[:2]
-	else:
-		# esc_lt = ["Ankush", "Anshuk", "Juhi", "Harsha_5th_year", "Naman", "Pragya", "Rachit", "Rakshith", "SaiPradeep", "Suraj"]
-		esc_lt = ["Ankush", "Suraj"]
-		for d in os.listdir(hm):
-			if d not in esc_lt:
-				lt_dir.append(hm+d)
-
-	if args["preProc"] == "0":
-		(data,y) = load_image(lt_dir)
 
 	# -----------------------------------------------------------------------------
 	# 2. Do the pre-processing
@@ -105,10 +96,27 @@ if __name__ == "__main__":
 
 	# -----------------------------------------------------------------------------
 	# 3. train test split and shuffling
-	pre_process = pp.PreProcess(data)
-	data_gr = pre_process.get_grayscale(data)
-	del pre_process
-	x_train,x_test,y_train,y_test = train_test_split(data_gr, y, test_size=0.2, random_state=29)
+	# esc_lt = ["Ankush", "Anshuk", "Juhi", "Harsha_5th_year", "Naman", "Pragya", "Rachit", "Rakshith", "SaiPradeep", "Suraj"]
+	esc_lt = ["Ankush", "Suraj"]
+	for d in os.listdir(hm):
+		if d not in esc_lt:
+			lt_dir.append(hm+d)
+
+	x_train = []
+	x_test = []
+	y_train = []
+	y_test = []
+	for i in range(len(lt_dir)):
+		(data,y) = load_image([lt_dir[i]])
+		pre_process = pp.PreProcess(data)
+		data_gr = pre_process.get_grayscale(data)
+		t_train,t_test,g_train,g_test = train_test_split(data_gr, y, test_size=0.2, random_state=30)
+		x_train.extend(t_train)
+		x_test.extend(t_test)
+		y_train.extend([i]*len(g_train))
+		y_test.extend([i]*len(g_test))
+
+	del pre_process,data_gr,data,y,t_train,t_test,g_train,g_test 
 
 	# -----------------------------------------------------------------------------
 	# 4. Making models and predicting
@@ -118,3 +126,4 @@ if __name__ == "__main__":
 
 # References:
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
+# LBPH = 30, 31, 29 (random state values) 
