@@ -32,6 +32,15 @@
  ------cv2Eigen =   0.9090909090909091<br>
  ------cv2Fisher =  0.916083916083916<br>
  ------cv2LBPH =    0.993006993006993<br>
+## Rank 3
+ ------cv2Eigen =   0.958041958041958<br>
+ ------cv2Fisher =  0.916083916083916<br>
+ ------cv2LBPH =    1.0<br>
+## Rank 10
+ ------cv2Eigen =   1.0<br>
+ ------cv2Fisher =  0.916083916083916<br>
+ ------cv2LBPH =    1.0<br>
+
 
 
 # Variable dependency (PCA on \# eigenfaces)
