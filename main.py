@@ -136,6 +136,7 @@ if __name__ == "__main__":
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
 # LBPH = 30, 31, 29 (random state values)
 # ----------------------------------Accuracy----------------------------
+# On pp_input_dlib
 # Rank 1
 # ------cv2Eigen =   0.7814569536423841
 # ------cv2Fisher =  0.7086092715231788
@@ -148,3 +149,18 @@ if __name__ == "__main__":
 # ------cv2Eigen =   0.9403973509933775
 # ------cv2Fisher =  0.8410596026490066
 # ------cv2LBPH =    0.9801324503311258
+#
+# On pp_input_harr_eye
+# Rank 1
+# ------cv2Eigen =   0.5384615384615384
+# ------cv2Fisher =  0.4076923076923077
+# ------cv2LBPH =    0.6538461538461539
+# Rank 3
+# ------cv2Eigen =   0.6538461538461539
+# ------cv2Fisher =  0.47692307692307695
+# ------cv2LBPH =    0.7692307692307693
+# Rank 10
+# ------cv2Eigen =   0.7846153846153846
+# ------cv2Fisher =  0.6230769230769231
+# ------cv2LBPH =    0.8384615384615385
+#
