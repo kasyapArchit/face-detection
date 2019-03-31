@@ -11,6 +11,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+import my_pca 
+from sklearn import svm
+from sklearn.svm import SVC,LinearSVC
+from sklearn.model_selection import GridSearchCV
 
 
 def get_accuracy(face_recognizer, x_test, y_test, rank):
@@ -51,6 +55,28 @@ def cv2LBPH(x_train, x_test, y_train, y_test, rank):
 	
 	print('Accuracy cv2LBPH = ',get_accuracy(face_recognizer,x_test,y_test,rank))
 	return
+
+def modify(data):
+	a=[]
+	for image in data:
+		# print (image.shape)
+		a.append(image.ravel())
+	return np.array(a)
+
+def my_pca_predict(x_train, x_test, y_train, y_test):
+	X_train = modify(x_train)
+	X_test = modify(x_test)
+	# print (x_train.shape)
+
+	pca = my_pca.PCA(n_components=60)
+	pca.fit(X_train)
+
+	train = pca.transform(X_train)
+	test = pca.transform(X_test)
+	
+	model = svm.SVC(kernel='linear')
+	model.fit(train, y_train)
+	print ("Accuracy - ",model.score(test, y_test))
 
 if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
@@ -152,9 +178,10 @@ if __name__ == "__main__":
 
 	# -----------------------------------------------------------------------------
 	# 4. Making models and predicting
-	cv2Eigen(x_train, x_test, y_train, y_test, rank)
-	cv2Fisher(x_train, x_test, y_train, y_test, rank)
-	cv2LBPH(x_train, x_test, y_train, y_test, rank)
+	# cv2Eigen(x_train, x_test, y_train, y_test, rank)
+	# cv2Fisher(x_train, x_test, y_train, y_test, rank)
+	# cv2LBPH(x_train, x_test, y_train, y_test, rank)
+	my_pca_predict(x_train, x_test, y_train, y_test)
 
 # References:
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
