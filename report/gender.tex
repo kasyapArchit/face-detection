@@ -1,0 +1,37 @@
+For recognising gender from the given image we didn't change any code or used any other algorithm, rather we just trained all our existing models on a different data-set which contained only two classes: one of males and other of females. We gave all the males a single label and all the females another and then applied all the previous models.\\
+
+\subsection{Rank 1 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{ll}
+model       & accuracy \\
+PCA(opencv) & 0.90     \\
+LDA         & 0.91     \\
+LBP         & 0.99    
+\end{tabular}
+\end{table}
+
+\newpage
+\subsection{Rank 3 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{ll}
+model       & accuracy \\
+PCA(opencv) & 0.95     \\
+LDA         & 0.91     \\
+LBP         & 1.0    
+\end{tabular}
+\end{table}
+
+\subsection{Rank 10 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{ll}
+model       & accuracy \\
+PCA(opencv) & 1.0     \\
+LDA         & 0.92     \\
+LBP         & 1.0    
+\end{tabular}
+\end{table}
+
+ We got an accuracy of 0.93 using open face.We can clearly see that the accuracy of the models for gender recognition is very good.\\

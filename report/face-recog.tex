@@ -1,0 +1,164 @@
+\subsection{Train-test split}
+After the pre-processing is done we move on to split the data-set into train and test such that ratio of data points in train and test for each class(person) is same, so that we better train our model and test it on all the classes. For doing this we load the saved pre-processed images each class at a time then applying train\_test\_split and appending them to the test and train data.
+
+\subsection{Training the Model}
+Now that we have pre-processed the image and split the data-set into train and test we use the training data to train out model. We use three different Models to train on the images.
+
+\subsubsection{PCA(Opencv)}
+For implementing PCA we have used cv2's implementation of Eigen faces:
+    \begin{lstlisting}[style=Python]
+    face_recognizer = cv2.face.EigenFaceRecognizer_create()
+    face_recognizer.setNumComponents(50)
+    face_recognizer.train(x_train, np.array(y_train))
+    \end{lstlisting}
+Here, we can set the number of eigen faces to use in the model. We will further look how the accuracy depends on this value.
+
+\subsubsection{PCA(our implementation)}
+We implemented our own PCA. The main theory behind PCA is that it tries to find out the Eigen faces which then helps us to reconstruct the image. For that we first have to find out the Eigen values and the corresponding eigen vectors of the matrix which denotes all the images in the dataset, but it is computationally hard that's we try to find the eigen values of $AA^T$ whose size is small thus making it feasible to compute. We then sort out the eigen values to get the top most eigen faces which will help us re-create the faces. After that we figure the eigen vectors from the matrix denoting the data and the eigen values. Then we generate the feature vector which we will use to train the models. To generate the feature vector related to each image we find the corresponding co-ordinate in the eigen plane for that image. After that we can train a ML model on the features to do face recognition. After that we use SVM as the ML model to do the face recognition.\\ \\
+Below is the code to find out the eigen-vecotrs and eigen-values:
+\newpage
+    \begin{lstlisting}[style=Python]
+    def fit(self, X):
+        # here X -> [ --img1-- ]      
+        #           [ --img2-- ]          
+        #           [ --imgi-- ]       
+    
+        [total_images, image_sz] = X.shape
+        
+        self.mean = X.mean(axis = 0)
+        X = X-self.mean
+
+        if total_images > image_sz :
+            cov = np.dot(X.T, X)
+            [self.eigenvalues, self.eigenvectors] = np.linalg.eigh(cov)
+        else:
+            cov = np.dot(X, X.T)
+            [self.eigenvalues, self.eigenvectors] = np.linalg.eigh(cov)
+            self.eigenvectors = np.dot(X.T, self.eigenvectors)
+
+            for i in range(total_images):
+                self.eigenvectors[:,i] = self.eigenvectors[:,i]/np.linalg.norm(self.eigenvectors[:,i])
+            
+
+        #sort eigenvalues in descending order
+        idx = np.argsort(-self.eigenvalues)
+        self.eigenvalues = self.eigenvalues[idx]
+        self.eigenvectors = self.eigenvectors[:,idx]
+        
+        # select only n_components
+        self.eigenvalues = self.eigenvalues[0 : self.n_components].copy()
+        self.eigenvectors = self.eigenvectors[ :, 0 : self.n_components].copy()
+\end{lstlisting}
+And the code to find the co-ordinates in the eigen plane corresponding to a specific image:
+    \begin{lstlisting}[style=Python]
+    def transform(self, X):
+        # here X-> [--img--] dim=(no_of_images * image_size)
+        if self.mean is None:
+            return np.dot(X, self.eigenvectors)
+
+        return np.dot(X - self.mean, self.eigenvectors)
+    \end{lstlisting}
+
+\subsubsection{LDA}
+For implementing LDA we have used cv2's implementation of Fisher faces:
+    \begin{lstlisting}[style=Python]
+    face_recognizer = cv2.face.FisherFaceRecognizer_create()
+    face_recognizer.train(x_train, np.array(y_train))
+    \end{lstlisting}
+    
+\subsubsection{LBP}
+For implementing LBP we have used cv2's implementation of LBPH faces:
+    \begin{lstlisting}[style=Python]
+    face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+    face_recognizer.train(x_train, np.array(y_train))
+    \end{lstlisting}
+
+\subsection{Testing the Models}
+For getting the accuracy of the models we define a function which takes input as trained model, test data and rank(till which rank to check from the prediction output).
+    \begin{lstlisting}[style=Python]
+    def get_accuracy(face_recognizer, x_test, y_test, rank):
+	y_pred_cnt = 0
+
+	for i in range(len(x_test)):
+		img = x_test[i]
+		res = cv2.face.StandardCollector_create()
+		face_recognizer.predict_collect(img, res)
+		res = res.getResults(sorted=True)
+		# tmp = min(range,len(res))
+		for j in range(rank):
+			(x,y) = res[j]
+			if x==y_test[i]:
+				y_pred_cnt += 1
+				break
+	return (y_pred_cnt/len(y_test))
+    \end{lstlisting}
+
+Now that we have trained the model and defined the function to calculate the accuracy given the model and rank.
+
+\subsubsection{Rank 1 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{lllll}
+    & harr\_eye & dlib &  &  \\
+PCA(opencv) & 0.53      & 0.79 &  &  \\
+PCA(our) & 0.27    & 0.77 &  &  \\
+LDA & 0.40      & 0.71 &  &  \\
+LBP & 0.76      & 0.91 &  & 
+\end{tabular}
+\end{table}
+Here harr\_eye stand for pre-processed input from harr face any eye classifier, while dlib tells that the pre-processed image comes from dlib.
+
+\newpage
+\subsubsection{Rank 3 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{lllll}
+    & harr\_eye & dlib &  &  \\
+PCA(opencv) & 0.65      & 0.86 &  &  \\
+PCA(our) & 0.41    & 0.91 &  &  \\
+LDA & 0.48      & 0.78 &  &  \\
+LBP & 0.77      & 0.96 &  & 
+\end{tabular}
+\end{table}
+
+\subsubsection{Rank 10 accuracy}
+
+\begin{table}[!ht]
+\begin{tabular}{lllll}
+    & harr\_eye & dlib &  &  \\
+PCA(opencv) & 0.78      & 0.94 &  &  \\
+PCA(our) & 0.59    & 0.98 &  &  \\
+LDA & 0.62      & 0.84 &  &  \\
+LBP & 0.84      & 0.98 &  & 
+\end{tabular}
+\end{table}
+
+\subsubsection{Number of Eigenfaces vs accuracy}
+Here we look at the accuracy values dependency on number of eigen faces used in case of PCA.
+
+\begin{table}[!ht]
+\begin{tabular}{lll}
+\# Eigen faces & accuracy(PCA opencv) & accuracy(PCA our) \\
+90             & 0.78     & 0.77\\
+80             & 0.78     & 0.77\\
+70             & 0.77     & 0.77\\
+60             & 0.79     & 0.76\\
+50             & 0.79     & 0.77\\
+40             & 0.79     & 0.75\\
+30             & 0.78     & 0.73\\
+20             & 0.72     & 0.72\\
+10             & 0.64     & 0.63\\
+5              & 0.47     & 0.44
+\end{tabular}
+\end{table}
+
+\subsection{Conclusion}
+\begin{itemize}
+    \item We can clearly see that in all cases we get the best accuracy with LBP followed by PCA and then LDA.
+    \item Accuracy values increases as we increase the rank for all the models.
+    \item Accuracy is relatively low for all models if we train them using the images which are pre-processed by Harr detectors than which are processed by dlib.
+    \item When we train model using images pre-processed by Harr then the accuracy there a huge increase in accuracy values from Rank 3 to Rank 10.
+    \item In case of PCA we see that as we increase the number of eigen faces the accuracy values increases and reaches the maximum around 50 eigen faces(for both opencv and out implementation) and then they start decreasing or becomes constant.
+    \item Our implementation of PCA works better or almost as same opencv implementation on the images pre-processed by dlib. But our implementation of PCA doesn't works fine on the images pre-processed by Harr detectores.
+\end{itemize}
+
