@@ -68,15 +68,32 @@ def my_pca_predict(x_train, x_test, y_train, y_test):
 	X_test = modify(x_test)
 	# print (x_train.shape)
 
-	pca = my_pca.PCA(n_components=60)
+	pca = my_pca.PCA(n_components = 60)
 	pca.fit(X_train)
 
 	train = pca.transform(X_train)
 	test = pca.transform(X_test)
 	
-	model = svm.SVC(kernel='linear')
+	model = svm.SVC(kernel='linear', probability=True)
 	model.fit(train, y_train)
-	print ("Accuracy - ",model.score(test, y_test))
+	predict_prob = model.predict_proba(test)
+	
+	top_1 = 0
+	top_3 = 0
+	top_10 = 0
+	total_len = len(y_test)
+	for i in range(total_len):
+		idx = np.argsort(-predict_prob[i])
+		if y_test[i] in idx[:1]:
+			top_1 += 1
+		if y_test[i] in idx[:3]:
+			top_3 += 1
+		if y_test[i] in idx[:10]:
+			top_10 += 1
+	
+	print("Top 1 accuracy", top_1/total_len)
+	print("Top 3 accuracy", top_3/total_len)
+	print("Top 10 accuracy", top_10/total_len)
 
 if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
@@ -178,10 +195,11 @@ if __name__ == "__main__":
 
 	# -----------------------------------------------------------------------------
 	# 4. Making models and predicting
-	# cv2Eigen(x_train, x_test, y_train, y_test, rank)
-	# cv2Fisher(x_train, x_test, y_train, y_test, rank)
-	# cv2LBPH(x_train, x_test, y_train, y_test, rank)
+	cv2Eigen(x_train, x_test, y_train, y_test, rank)
+	cv2Fisher(x_train, x_test, y_train, y_test, rank)
+	cv2LBPH(x_train, x_test, y_train, y_test, rank)
 	my_pca_predict(x_train, x_test, y_train, y_test)
+
 
 # References:
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
