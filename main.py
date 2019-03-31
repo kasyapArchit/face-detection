@@ -32,7 +32,7 @@ def get_accuracy(face_recognizer, x_test, y_test, rank):
 
 def cv2Eigen(x_train, x_test, y_train, y_test, rank):
 	face_recognizer = cv2.face.EigenFaceRecognizer_create()
-	face_recognizer.setNumComponents(80)
+	face_recognizer.setNumComponents(50)
 	face_recognizer.train(x_train, np.array(y_train))
 	
 	print('Accuracy cv2Eigen = ',get_accuracy(face_recognizer,x_test,y_test,rank))
@@ -56,6 +56,7 @@ if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--preProc", required=True, help="to do pre-processing or not; in case of preprocessing only one class is used")
 	ap.add_argument("-m", "--modelPredictor", required=False, help="which model to use as face predictor in pre-processing")
+	ap.add_argument("-g", "--gender", required=True, help="whether to do gender based prediction")
 	ap.add_argument("-n", "--inputPath", required=True, help="path to the folder to load image")
 	ap.add_argument("-r", "--rank", required=True, help="rank for calculating accuracy")
 	args = vars(ap.parse_args())
@@ -105,26 +106,49 @@ if __name__ == "__main__":
 	# -----------------------------------------------------------------------------
 	# 3. train test split and shuffling
 	# esc_lt = ["Ankush", "Anshuk", "Juhi", "Harsha_5th_year", "Naman", "Pragya", "Rachit", "Rakshith", "SaiPradeep", "Suraj"]
-	esc_lt = ["Ankush", "Suraj"]
-	for d in os.listdir(hm):
-		if d not in esc_lt:
-			lt_dir.append(hm+d)
+	if args["gender"] == "0":
+		esc_lt = ["Ankush", "Suraj"]
+		for d in os.listdir(hm):
+			if d not in esc_lt:
+				lt_dir.append(hm+d)
 
-	x_train = []
-	x_test = []
-	y_train = []
-	y_test = []
-	for i in range(len(lt_dir)):
-		(data,y) = load_image([lt_dir[i]])
-		pre_process = pp.PreProcess(data)
-		data_gr = pre_process.get_grayscale(data)
-		t_train,t_test,g_train,g_test = train_test_split(data_gr, y, test_size=0.2, random_state=30)
-		x_train.extend(t_train)
-		x_test.extend(t_test)
-		y_train.extend([i]*len(g_train))
-		y_test.extend([i]*len(g_test))
+		x_train = []
+		x_test = []
+		y_train = []
+		y_test = []
+		for i in range(len(lt_dir)):
+			(data,y) = load_image([lt_dir[i]])
+			pre_process = pp.PreProcess(data)
+			data_gr = pre_process.get_grayscale(data)
+			t_train,t_test,g_train,g_test = train_test_split(data_gr, y, test_size=0.2, random_state=30)
+			x_train.extend(t_train)
+			x_test.extend(t_test)
+			y_train.extend([i]*len(g_train))
+			y_test.extend([i]*len(g_test))
 
-	del pre_process,data_gr,data,y,t_train,t_test,g_train,g_test
+		del pre_process,data_gr,data,y,t_train,t_test,g_train,g_test
+	else:
+		esc_lt = ["Ankush", "Suraj"]
+		girls = [hm+"Anagha", hm+"Deepika", hm+"Deepti", hm+"Devyani", hm+"Juhi", hm+"Nehal", hm+"Prachi", hm+"Pragya", hm+"Shiloni", hm+"Sowmya", hm+"Sravya", hm+"Tripti"]
+		for d in os.listdir(hm):
+			if d not in esc_lt:
+				lt_dir.append(hm+d)
+
+		x = []
+		y = []
+		for i in range(len(lt_dir)):
+			(data,_) = load_image([lt_dir[i]])
+			pre_process = pp.PreProcess(data)
+			data_gr = pre_process.get_grayscale(data)
+			x.extend(data_gr)
+			if lt_dir[i] in girls:
+				y.extend([0]*len(data_gr))
+			else:
+				y.extend([1]*len(data_gr))
+			
+		x_train,x_test,y_train,y_test = train_test_split(x, y, test_size=0.2, random_state=30)
+		del data, data_gr, pre_process, x, y
+
 
 	# -----------------------------------------------------------------------------
 	# 4. Making models and predicting
@@ -135,32 +159,3 @@ if __name__ == "__main__":
 # References:
 # https://www.pyimagesearch.com/2017/05/22/face-alignment-with-opencv-and-python/
 # LBPH = 30, 31, 29 (random state values)
-# ----------------------------------Accuracy----------------------------
-# On pp_input_dlib
-# Rank 1
-# ------cv2Eigen =   0.7814569536423841
-# ------cv2Fisher =  0.7086092715231788
-# ------cv2LBPH =    0.9072847682119205
-# Rank 3
-# ------cv2Eigen =   0.8543046357615894
-# ------cv2Fisher =  0.7814569536423841
-# ------cv2LBPH =    0.9602649006622517
-# Rank 10
-# ------cv2Eigen =   0.9403973509933775
-# ------cv2Fisher =  0.8410596026490066
-# ------cv2LBPH =    0.9801324503311258
-#
-# On pp_input_harr_eye
-# Rank 1
-# ------cv2Eigen =   0.5384615384615384
-# ------cv2Fisher =  0.4076923076923077
-# ------cv2LBPH =    0.6538461538461539
-# Rank 3
-# ------cv2Eigen =   0.6538461538461539
-# ------cv2Fisher =  0.47692307692307695
-# ------cv2LBPH =    0.7692307692307693
-# Rank 10
-# ------cv2Eigen =   0.7846153846153846
-# ------cv2Fisher =  0.6230769230769231
-# ------cv2LBPH =    0.8384615384615385
-#
